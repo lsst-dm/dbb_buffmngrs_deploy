@@ -31,6 +31,6 @@ RUN chown buffmngr:buffmngr run_buffmngr.sh \
     && chown buffmngr:buffmngr buffmngr.yml \
     && chmod a+r buffmngr.yml
 
-USER manager
+USER buffmngr
 ENTRYPOINT ["/home/buffmngr/run_buffmngr.sh"]
 CMD ["/home/buffmngr/buffmngr.yml"]
