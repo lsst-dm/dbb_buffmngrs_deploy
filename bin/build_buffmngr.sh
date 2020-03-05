@@ -6,7 +6,7 @@ script=`basename $0`
 path=`realpath $(dirname $0)`
 root=`dirname ${path}`
 
-. ${root}/etc/env.conf
+. ${root}/etc/handoff.conf
 
 appdir="${root}/docker/dbb_buffmngrs_handoff"
 if [ ! -d ${appdir} ]; then

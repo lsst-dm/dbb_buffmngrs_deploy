@@ -5,7 +5,7 @@
 path=`realpath $(dirname $0)`
 root=`dirname ${path}`
 
-. ${root}/etc/env.conf
+. ${root}/etc/handoff.conf
 
 home=`eval "echo ~${USER}"`
 docker container run \

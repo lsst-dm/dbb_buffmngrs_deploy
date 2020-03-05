@@ -64,7 +64,7 @@ Build the image
 ---------------
 
 #. Select desired version of LSST stack and DBB buffer manager in
-   ``etc/env.conf`` by modifying respectively ``STACK_VER`` and
+   ``etc/handoff.conf`` by modifying respectively ``STACK_VER`` and
    ``MANAGER_VER``. 
 
 #. Select a user which will be used to run DBB buffer manager within the Docker
