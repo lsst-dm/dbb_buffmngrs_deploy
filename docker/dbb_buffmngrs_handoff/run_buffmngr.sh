@@ -2,7 +2,7 @@
 #
 # run_buffmngr.sh: sets up and start the buffer manager
 
-exec &> /var/log/buffmngrs/handoff.log
+exec &> /var/log/buffmngrs/at-handoff.log
 
 source /opt/lsst/software/stack/loadLSST.bash
 setup --verbose --root /opt/lsst/addons/dbb_buffmngrs_handoff

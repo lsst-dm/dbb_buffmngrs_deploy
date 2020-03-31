@@ -18,6 +18,6 @@ docker build \
    --build-arg MANAGER_VER \
    --build-arg UID=$(id -u ${USER}) \
    --build-arg GID=$(id -g ${USER}) \
-   --tag lsstdm/buffmngr:${IMAGE_TAG} \
+   --tag lsstdm/at-dbbbm:${IMAGE_TAG} \
    ${appdir}	
 exit 0

@@ -14,5 +14,5 @@ docker container run \
     --volume /data/staging:/data \
     --volume /var/log/buffmngrs:/var/log/buffmngrs \
     --volume ${home}/.ssh:/home/buffmngr/.ssh:ro \
-    lsstdm/buffmngr:${IMAGE_TAG}
+    lsstdm/at-dbbbm:${IMAGE_TAG}
 exit 0
