@@ -1,0 +1,52 @@
+version: "3.6"
+services:
+  at-dbbbm:
+    image: lsst/dbbbm:${TAG}
+    command: ["./local/etc/at_dbbbm_config.yaml"]
+    volumes:
+      - type: bind
+        source: /data/auxtel
+        target: /data
+      - type: bind
+        source: /var/log/buffmngrs
+        target: /var/log
+      - type: bind
+        source: ../etc
+        target: ${TGT_HOME}/local/etc
+      - type: bind
+        source: ${SRC_HOME}/.ssh
+        target: ${TGT_HOME}/.ssh
+        read_only: true
+    user: ${USR_ID}:${GRP_ID}
+    depends_on:
+      - dbbbm
+  cc-dbbbm:
+    image: lsst/dbbbm:${TAG}
+    command: ["./local/etc/cc_dbbbm_config.yaml"]
+    volumes:
+      - type: bind
+        source: /data/comcam
+        target: /data
+      - type: bind
+        source: /var/log/buffmngrs
+        target: /var/log
+      - type: bind
+        source: ../etc
+        target: ${TGT_HOME}/local/etc
+      - type: bind
+        source: ${SRC_HOME}/.ssh
+        target: ${TGT_HOME}/.ssh
+        read_only: true
+    user: ${USR_ID}:${GRP_ID}
+    depends_on:
+      - dbbbm
+  dbbbm:
+    image: lsst/dbbbm:${TAG}
+    build:
+      context: ./dbb_buffmngrs_handoff
+      args:
+        - LSST_VER
+        - MNGR_VER
+        - GRP_ID
+        - USR_ID
+      network: host

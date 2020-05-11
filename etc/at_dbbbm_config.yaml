@@ -1,0 +1,13 @@
+handoff:
+  buffer: /data/buffer
+  holding: /data/holding
+endpoint:
+  user: mxk
+  host: lsst-dev03.ncsa.illinois.edu
+  buffer: /home/mxk/jhome/lsstdata/offline/badfiles/auxtel/buffer
+  staging: /home/mxk/jhome/lsstdata/offline/badfiles/auxtel/staging
+  storage: /home/mxk/jhome/lsstdata/offline/badfiles/auxtel/storage
+logging:
+  file: /var/log/at_handoff.log
+general:
+   expiration_time: 600

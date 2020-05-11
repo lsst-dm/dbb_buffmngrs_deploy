@@ -1,0 +1,13 @@
+handoff:
+  buffer: /data/buffer
+  holding: /data/holding
+endpoint:
+  user: mxk
+  host: lsst-dev03.ncsa.illinois.edu
+  buffer: /home/mxk/jhome/lsstdata/offline/badfiles/comcam/buffer
+  staging: /home/mxk/jhome/lsstdata/offline/badfiles/comcam/staging
+  storage: /home/mxk/jhome/lsstdata/offline/badfiles/comcam/storage
+logging:
+  file: /var/log/cc_handoff.log
+general:
+   expiration_time: 600
