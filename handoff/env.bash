@@ -10,7 +10,7 @@ export TAG="${MNGR_VER}"
 # User which will run the image. User MUST exists!
 export USER="arc"
 
-# Derived or internal environmental variables used by docker-compose.
+# Derived and internal environmental variables used by docker.
 #
 # WARNING
 # -------
@@ -18,4 +18,4 @@ export USER="arc"
 export USR_ID=`id -u ${USER}`
 export GRP_ID=`id -g ${USER}`
 export SRC_HOME=`eval "echo ~${USER}"`
-export TGT_HOME="/home/mngr"
+export TGT_HOME="/home/mgr"

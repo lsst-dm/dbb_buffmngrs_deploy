@@ -11,7 +11,7 @@ services:
         source: /var/log/buffmngrs
         target: /var/log
       - type: bind
-        source: ../etc
+        source: ./etc
         target: ${TGT_HOME}/local/etc
       - type: bind
         source: ${SRC_HOME}/.ssh
@@ -31,7 +31,7 @@ services:
         source: /var/log/buffmngrs
         target: /var/log
       - type: bind
-        source: ../etc
+        source: ./etc
         target: ${TGT_HOME}/local/etc
       - type: bind
         source: ${SRC_HOME}/.ssh
@@ -43,7 +43,7 @@ services:
   dbbbm:
     image: lsst/dbbbm:${TAG}
     build:
-      context: ./dbb_buffmngrs_handoff
+      context: ./dbbbm
       args:
         - LSST_VER
         - MNGR_VER

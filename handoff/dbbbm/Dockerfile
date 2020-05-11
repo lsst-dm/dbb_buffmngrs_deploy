@@ -20,14 +20,14 @@ RUN source /opt/lsst/software/stack/loadLSST.bash \
 # Create a non-privileged user account.
 ARG GRP_ID
 ARG USR_ID
-RUN groupadd -g $GRP_ID mngr \
-    && useradd -g $GRP_ID -m -s /bin/bash -u $USR_ID mngr
+RUN groupadd -g $GRP_ID mgr \
+    && useradd -g $GRP_ID -m -s /bin/bash -u $USR_ID mgr
 
-WORKDIR /home/mngr
-COPY run_mngr.sh .
-RUN chown mngr:mngr run_mngr.sh \
-    && chmod a+x run_mngr.sh
+WORKDIR /home/mgr
+COPY run_dbbbm.sh .
+RUN chown mgr:mgr run_dbbbm.sh \
+    && chmod a+x run_dbbbm.sh
 
-USER mngr
-ENTRYPOINT ["./run_mngr.sh"]
+USER mgr
+ENTRYPOINT ["./run_dbbbm.sh"]
 CMD ["-h"]
