@@ -5,10 +5,10 @@ services:
     command: ["./local/etc/at_dbbbm_config.yaml"]
     volumes:
       - type: bind
-        source: /data/auxtel
+        source: /data
         target: /data
       - type: bind
-        source: /var/log/buffmngrs
+        source: /var/log
         target: /var/log
       - type: bind
         source: ./etc
@@ -25,10 +25,10 @@ services:
     command: ["./local/etc/cc_dbbbm_config.yaml"]
     volumes:
       - type: bind
-        source: /data/comcam
+        source: /data
         target: /data
       - type: bind
-        source: /var/log/buffmngrs
+        source: /var/log
         target: /var/log
       - type: bind
         source: ./etc
