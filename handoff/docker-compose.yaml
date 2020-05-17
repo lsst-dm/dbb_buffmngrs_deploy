@@ -1,7 +1,7 @@
 version: "3.6"
 services:
   at-dbbbm:
-    image: lsst/dbbbm:${TAG}
+    image: lsstts/dbbbm:${TAG}
     command: ["./local/etc/at_dbbbm_config.yaml"]
     environment:
       - GRP_ID
@@ -23,7 +23,7 @@ services:
     depends_on:
       - dbbbm
   cc-dbbbm:
-    image: lsst/dbbbm:${TAG}
+    image: lsstts/dbbbm:${TAG}
     command: ["./local/etc/cc_dbbbm_config.yaml"]
     environment:
       - GRP_ID
@@ -46,7 +46,7 @@ services:
     depends_on:
       - dbbbm
   dbbbm:
-    image: lsst/dbbbm:${TAG}
+    image: lsstts/dbbbm:${TAG}
     build:
       context: ./dbbbm
       args:
