@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # run_mngr.sh: sets up and start the DBB buffer manager
 
@@ -52,4 +52,4 @@ echo "--- Runtime ---"
 transd.py -c ${config}
 echo
 
-exit 0
+exit "$?"
