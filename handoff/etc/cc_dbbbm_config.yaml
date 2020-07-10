@@ -1,0 +1,11 @@
+handoff:
+  buffer: /data/buffer
+  holding: /data/holding
+endpoint:
+  user: jdoe
+  host: endpoint.host.edu
+  buffer: /data/cc/buffer
+  staging: /data/cc/staging
+  storage: /data/cc/storage
+logging:
+  file: /var/log/cc_handoff.log

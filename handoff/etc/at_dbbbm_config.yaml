@@ -1,0 +1,11 @@
+handoff:
+  buffer: /data/buffer
+  holding: /data/holding
+endpoint:
+  user: jdoe
+  host: endpoint.host.edu
+  buffer: /data/at/buffer
+  staging: /data/at/staging
+  storage: /data/at/storage
+logging:
+  file: /var/log/at_handoff.log

@@ -22,7 +22,7 @@ DBB handoff buffer manager
 Download deployment scripts
 ---------------------------
 
-Recommended way of deploying DBB handoff buffer manager is with Docker
+Recommended way of deploying DBB handoff buffer manager is with a Docker
 container.  You can download scripts which help you build and run such a
 container from GitHub:
 
@@ -36,90 +36,179 @@ container from GitHub:
 Configure DBB handoff buffer manager
 ------------------------------------
 
-In ``docker/dbb_buffmngrs_handoff/buffmngr.yml``, in **endpoint** section you
-need to specify three directories:  
+You can find an example configuration file in ``handoff/etc/config.yaml``.
+Only **handoff** and **endpoint** sections are required, others are optional
+and hence are commented out.  Each of these sections describes handoff and
+endpoint site respectively.
 
-1. **staging area**: directory where the files are being transferred to,
-2. **storage area**: directory where the files will be moved after transfer is
+In **handoff** sections you need to specify two directories:
+
+1. **buffer**: directory where files are being written to,
+2. **holding** area: directory where files will be moved after being
+   transferred successfully. 
+
+.. warning::
+
+   When deploying the mangeer in a Docker container, both directories specify
+   locations *in* the container!  They will most likely be different from
+   actual directories on the host system and will also depend on actual bind
+   mounts (see :ref:`section-handoff-mounts`).
+
+In **endpoint** section you need to specify two directories (in any order):
+
+1. **staging** area: directory where the files are being transferred to,
+2. **buffer** directory where the files will be moved after transfer is
    complete,
-3. **buffer**: directory used by the manager,
 
 as well as
 
-4. **host**: the name of the host acting as the endpoint site,
-5. **user**: a user account to use for file transfer (the manger uses
-   internally ``scp`` to transfer files between the sites, so anonymous
-   transfer is not supported).
+3. **host**: the name of the host acting as the endpoint site,
+4. **user**: a user account to use for file transfer.
 
 .. warning::
 
    The selected user needs to have passwordless login enabled on the endpoint
-   site.  
+   site.  As the manger uses internally ``scp`` to transfer files between the
+   sites, anonymous transfer is not supported.
    
 .. note:: 
 
-   Only *handoff* and *endpoint* sections are strictly required to be present
-   in the configuration file.  However, enabling logging to a file (by default
-   DBB handoff buffer manager outputs log messages on stdout/stderr) is highly
-   recommended. You can achieve it by specifying **file** option in **logging**
-   section, for example:
+   By default, DBB handoff buffer manager outputs log messages on
+   stdout/stderr.  However, enabling logging to a file is highly recommended.
+   You can achieve it by specifying **file** option in **logging** section, for
+   example:
 
    .. code-block::
    
       logging:
-        file: /var/log/lsst/handoff.log
+        file: /var/log/handoff.log
 
    Keep in mind though that in order to easily view the log file outside of the
    container, you need to bind mount a writable directory from the host machine
    to that location (see :ref:`section-handoff-mounts` for details).
 
-.. _section-handoff-building:
+By default, ``handoff/etc`` is bind mounted in the docker image to
+``~/local/etc`` so each configuration file created in this directory will be
+available in the resultant docker image.
 
-Build the image
----------------
+To select which configuration should be used by the handoff manager when the
+container is started, adjust the path in the **command** option in
+``handoff/docker-compose.yaml``.
 
-#. Select desired version of LSST stack and DBB handoff buffer manager in
-   ``etc/handoff.conf`` by modifying respectively ``STACK_VER`` and
-   ``MANAGER_VER``. 
+.. note::
 
-#. Select a user which will be used to run the manager within the Docker
-   container by adjusting ``USER`` variable.  This user needs to have a
-   read/write access to the buffer, holding area, and the directory where the
-   log file will be written to.
+   The included Compose file (see :ref:`section-handoff-manage`) allow one to
+   start buffer managers for two separate instruments: AuxTel (section
+   **at-dbbm**) and ComCam (section **cc-dbbbm**).  By default, their
+   configurations are read from ``at_dbbbm_config.yaml`` and
+   ``cc_dbbbm_config.yaml`` respectively.  Feel free to repurpose them
+   according to your needs.
 
-#. Build the Docker image with
+.. _section-handoff-manage:
 
-   .. code:: bash
+Manage the manager
+------------------
 
-      ./bin/build_buffmngr.sh
+Actions such as:
+
+* building Docker image with the handoff manager,
+* starting/stopping the manager for a given instrument,
+
+are managed centrally with help of ``docker-compose`` and service configuration
+files: ``env.bash`` and ``handoff/docker-compose.yaml``.
+
+However, the each handoff manager you start needs to have access to selected
+directories on the host running the image to do its job.  That is achieved by
+making these directories accessible in the Docker container with use of bind
+mounts.
+
+.. note::
+
+   You can find more about Docker Compose file `here`_.
+
+.. __: https://docs.docker.com/compose/compose-file/
 
 .. _section-handoff-mounts:
 
 Adjust bind mounts
 ------------------
 
-There is a helping script, ``bin/start_buffmngr.sh``, available in the
-repository you cloned allowing you to start the container with minimum effort.
-However, before you can use it, you need to adjust bind mounts which enables
-the DDB handoff buffer manager running inside of the container to interact with
-filesystems necessary to do its job. These are:
+There are four crucial bind mounts for each instrument:
 
-* the buffer and the holding area,
-* log directory (usually ``/var/log``),
-* directory with SSH keys (usually ``~/.ssh``).
+* directory that holds the buffer and the holding area,
+* directory where logs are kept (usually ``/var/log``),
+* directory with the configuration files (be default, ``handoff/etc``).
+* directory with SSH keys needed to access to the endpoint site (usually
+  ``~/.ssh``).
 
-Make sure these bind mounts reflect your setup.
+These bind mounts are defined in **volumes** section for each buffer manager in
+``handoff/docker-compose.yaml``.  For sake of simplicity, provided example
+files assume that the host have identical directory structure as the container
+with the buffer manager so the mapping is straightforward.  In reality, it's
+hardly the case.  You need to make sure that the bind mounts accurately reflect
+actual setup!
+
+.. note::
+
+   You can find out more about Docker volumes `here`_.
+
+.. __: https://docs.docker.com/storage/volumes/
+
+.. _section-handoff-building:
+
+Build the image
+---------------
+
+Building manually the Docker image with handoff manager is not strictly
+necessary.  For example, command ``docker-compose up cc-dbbbm`` will not only
+start the handoff manager for a Comcam system, but also will build required
+image if it is not ready available.
+
+However, on certain occasions (e.g. uploading the image to DockerHub), you may
+want to just build the image without starting the manager itself. You can do
+it as follow:
+
+#. Select desired version of LSST stack and DBB handoff buffer manager in
+   ``env.bash`` by modifying respectively ``LSST_VER`` and ``MNGR_VER``. 
+
+#. Select a user which will be used to run the manager within the Docker
+   container by adjusting ``USER`` variable.  This user needs to have a
+   read/write access to the buffer, holding area, and the directory where the
+   log file will be written to on the *host* system.
+
+#. Build the Docker image with
+
+   .. code:: bash
+
+      cd handoff
+      source env.bash
+      docker-compose build dbbbm
 
 .. _section-handoff-starting:
 
 Start the container
 -------------------
 
-Once you correct the bind mount, you can start the container with
+Once you created a configuration files satisfying your needs, adjusted the bind
+mounts you are ready to start the container with handoff buffer manager.
+
+If you haven't done it already, intialize runtime environment with
 
 .. code-block:: bash
 
-   ./bin/start_buffmngr.sh
+   source env.sh
+
+To start handoff managers for all known instruments, run
+
+.. code-block:: bash
+
+   docker-compose up -d
+
+To start the handoff manager for a selected instrument, say Comcam, run
+
+.. code-block:: bash
+
+   docker-compose up -d cc-dbbbm
 
 .. _section-endpoint:
 
