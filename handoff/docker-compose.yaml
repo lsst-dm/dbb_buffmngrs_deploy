@@ -42,7 +42,6 @@ services:
         source: ${HOME}/.ssh
         target: /tmp/.ssh
         read_only: true
-    user: ${USR_ID}:${GRP_ID}
     depends_on:
       - dbbbm
   dbbbm:
