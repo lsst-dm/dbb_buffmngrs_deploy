@@ -54,17 +54,16 @@ In **handoff** sections you need to specify two directories:
    actual directories on the host system and will also depend on actual bind
    mounts (see :ref:`section-handoff-mounts`).
 
-In **endpoint** section you need to specify three directories (in any order):
+In **endpoint** section you need to specify two directories (in any order):
 
 1. **staging** area: directory where the files are being transferred to,
-2. **storage** area: directory where the files will be moved after transfer is
+2. **buffer** directory where the files will be moved after transfer is
    complete,
-3. **buffer**: directory used by the manager,
 
 as well as
 
-4. **host**: the name of the host acting as the endpoint site,
-5. **user**: a user account to use for file transfer.
+3. **host**: the name of the host acting as the endpoint site,
+4. **user**: a user account to use for file transfer.
 
 .. warning::
 
