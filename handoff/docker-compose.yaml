@@ -1,11 +1,19 @@
-version: "3.6"
+version: "3.8"
 services:
   at-dbbbm:
+    build:
+      context: ./dbbbm
+      args:
+        - BBCP_VER
+        - LSST_VER
+        - MNGR_VER
+      network: host
     image: lsstts/dbbbm:${TAG}
     command: ["./local/etc/at_dbbbm_config.yaml"]
     environment:
       - GRP_ID
       - USR_ID
+    network_mode: host
     volumes:
       - type: bind
         source: /data
@@ -20,14 +28,20 @@ services:
         source: ${HOME}/.ssh
         target: /tmp/.ssh
         read_only: true
-    depends_on:
-      - dbbbm
   cc-dbbbm:
+    build:
+      context: ./dbbbm
+      args:
+        - BBCP_VER
+        - LSST_VER
+        - MNGR_VER
+      network: host
     image: lsstts/dbbbm:${TAG}
     command: ["./local/etc/cc_dbbbm_config.yaml"]
     environment:
       - GRP_ID
       - USR_ID
+    network_mode: host
     volumes:
       - type: bind
         source: /data
@@ -42,13 +56,4 @@ services:
         source: ${HOME}/.ssh
         target: /tmp/.ssh
         read_only: true
-    depends_on:
-      - dbbbm
-  dbbbm:
-    image: lsstts/dbbbm:${TAG}
-    build:
-      context: ./dbbbm
-      args:
-        - LSST_VER
-        - MNGR_VER
-      network: host
+
