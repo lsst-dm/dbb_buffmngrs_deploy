@@ -34,7 +34,6 @@ RUN chmod +x /bin/docker-entrypoint.sh
 ARG MNGR_VER
 WORKDIR /opt/lsst/addons
 RUN source /opt/lsst/software/stack/loadLSST.bash \
-    && conda install --yes jsonschema \
     && git clone https://github.com/lsst-dm/dbb_buffmngrs_handoff.git \
     && cd dbb_buffmngrs_handoff \
     && git checkout $MNGR_VER \
