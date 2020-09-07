@@ -12,13 +12,13 @@ endpoint:
   staging: /data/staging
   command:
     remote: "ssh {user}@{host} \"{command}\""
-    transfer: "bbcp -T \"ssh -a -x -oFallBackToRsh=no %4 %I -l %U %H /home/lsstdbot/bin/bbcp\" -Z 56000:57000 {batch} {user}@{host}:{dest}"
+    transfer: "bbcp -T \"ssh -a -x -oFallBackToRsh=no %4 %I -l %U %H /home/lsstdbot/bin/bbcp\" -Z 56000:57000 -s 4 {batch} {user}@{host}:{dest}"
 logging:
   format: %(asctime)s:%(name)s:%(levelname)s:%(message)s
-  file: transd.log
+  file: hdfmgr.log
   level: INFO
 general:
-  chunk_size: 1
+  chunk_size: 10
   timeout: null
   num_threads: 1
   expiration_time: 86400

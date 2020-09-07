@@ -1,8 +1,8 @@
 # Version of the LSST stack to use.
-export LSST_VER="7-stack-lsst_distrib-w_2020_33"
+export LSST_VER="7-stack-lsst_distrib-w_2020_34"
 
 # Version of the DBB buffer manager to use.
-export MNGR_VER="1.2.0-rc1"
+export MNGR_VER="1.3.0"
 
 # Label which will be applied to the resultant Docker image. 
 export TAG="${MNGR_VER}-${LSST_VER##*-}"
