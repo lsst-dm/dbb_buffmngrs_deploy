@@ -37,10 +37,15 @@ if [ -n "${log}" ]; then
     exec &> ${log}
 fi
 
+# Find out location of the SQLite database in the manager's configuration file.
+db=`grep '^ *engine:' ${config} | \
+        sed 's/^ *//' | cut -d \  -f 2 - | \
+        sed 's/^"*[^\/]*\/\/\/\(\/\{0,1\}[^"]*\)"*$/\1/'`
+
 source /opt/lsst/software/stack/loadLSST.bash
 setup --root /opt/lsst/addons/dbb_buffmngrs_handoff
 
-echo "--- Environemnt ---"
+echo "--- Environment ---"
 eups list --setup
 echo
 
@@ -49,7 +54,11 @@ cat ${config}
 echo
 
 echo "--- Runtime ---"
-transd.py -c ${config}
+if [ ! -e ${db} ]; then
+	echo "Creating SQLite database at \"${db}\"."
+	hdfmgr initdb ${config}
+fi
+hdfmgr run ${config}
 echo
 
 exit "$?"

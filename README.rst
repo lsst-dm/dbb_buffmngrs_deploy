@@ -29,22 +29,25 @@ container from GitHub:
 .. code-block:: bash
 
    git clone https://github.com/lsst-dm/dbb_buffmngrs_deploy .
-   cd dbb_buffmngrs_deploy
+   cd dbb_buffmngrs_deploy/handoff
 
 .. _section-handoff-configuration:
 
 Configure DBB handoff buffer manager
 ------------------------------------
 
-You can find an example configuration file in ``handoff/etc/config.yaml``.
-Only **handoff** and **endpoint** sections are required, others are optional
-and hence are commented out.  Each of these sections describes handoff and
-endpoint site respectively.
+You can find an example configuration file in ``etc/config.yaml``.  Only
+**database**, **handoff**, and **endpoint** sections are required, others are
+optional and are only provided for sake of completeness.
 
-In **handoff** sections you need to specify two directories:
+In the **database** section you really only need to specify **engine**, so
+called **connect string* which informs the manager where the database is
+located and what protocl to use to establish a connection with it.
 
-1. **buffer**: directory where files are being written to,
-2. **holding** area: directory where files will be moved after being
+In the **handoff** section you need to specify two directories:
+
+#. **buffer**: directory where files are being written to,
+#. **holding** area: directory where files will be moved after being
    transferred successfully. 
 
 .. warning::
@@ -58,42 +61,36 @@ In **endpoint** section you need to specify two directories (in any order):
 
 1. **staging** area: directory where the files are being transferred to,
 2. **buffer** directory where the files will be moved after transfer is
-   complete,
+   completed,
 
 as well as
 
 3. **host**: the name of the host acting as the endpoint site,
-4. **user**: a user account to use for file transfer.
+4. **user**: a user account to use on the endpoint site for authentication
+   purposes.
+5. **commands**: shell commands which the manager should use to execute
+   commands remotely on the endpoint site and to transfer files.
 
 .. warning::
 
-   The selected user needs to have passwordless login enabled on the endpoint
-   site.  As the manger uses internally ``scp`` to transfer files between the
-   sites, anonymous transfer is not supported.
-   
-.. note:: 
+   Getting commands described above right is *crucial* for proper functioning
+   of the manager.  So either stick to the provided defaults or really do know
+   what you're doing when altering them.
 
-   By default, DBB handoff buffer manager outputs log messages on
-   stdout/stderr.  However, enabling logging to a file is highly recommended.
-   You can achieve it by specifying **file** option in **logging** section, for
-   example:
+.. warning::
 
-   .. code-block::
-   
-      logging:
-        file: /var/log/handoff.log
+   The handoff manager uses SSH protocol to securly execute remote commands and
+   deliver files to the endpoint site.  SSH protocol requires some for of
+   authentication and the manager uses an SSH key for that purpose.  Make sure
+   that the public part of that SSH key is present in `authorized_keys` file of
+   the account you specified in the **endpoint** section.
 
-   Keep in mind though that in order to easily view the log file outside of the
-   container, you need to bind mount a writable directory from the host machine
-   to that location (see :ref:`section-handoff-mounts` for details).
 
-By default, ``handoff/etc`` is bind mounted in the docker image to
+By default, ``${HOME}/local/etc`` is bind mounted in the docker image to
 ``~/local/etc`` so each configuration file created in this directory will be
-available in the resultant docker image.
-
-To select which configuration should be used by the handoff manager when the
-container is started, adjust the path in the **command** option in
-``handoff/docker-compose.yaml``.
+available in the resultant docker container.  To select which configuration
+should be used by the handoff manager when the container is started, adjust the
+path in the **command** option in ``docker-compose.yaml``.
 
 .. note::
 
@@ -101,8 +98,24 @@ container is started, adjust the path in the **command** option in
    start buffer managers for two separate instruments: AuxTel (section
    **at-dbbm**) and ComCam (section **cc-dbbbm**).  By default, their
    configurations are read from ``at_dbbbm_config.yaml`` and
-   ``cc_dbbbm_config.yaml`` respectively.  Feel free to repurpose them
-   according to your needs.
+   ``cc_dbbbm_config.yaml`` respectively.  Feel free to repurpose them according
+   to your needs.
+
+Logging
+^^^^^^^
+
+By default, DBB handoff buffer manager outputs log messages on stdout/stderr.
+However, enabling logging to a file is highly recommended.  You can achieve it
+by specifying **file** option in **logging** section, for example:
+
+.. code-block::
+   
+   logging:
+     file: /var/log/handoff.log
+
+Keep in mind though that in order to easily view the log file outside of the
+container, you need to bind mount a writable directory from the host machine to
+that location (see :ref:`section-handoff-mounts` for details).
 
 .. _section-handoff-manage:
 
@@ -115,7 +128,7 @@ Actions such as:
 * starting/stopping the manager for a given instrument,
 
 are managed centrally with help of ``docker-compose`` and service configuration
-files: ``env.bash`` and ``handoff/docker-compose.yaml``.
+files: ``env.bash`` and ``docker-compose.yaml``.
 
 However, the each handoff manager you start needs to have access to selected
 directories on the host running the image to do its job.  That is achieved by
@@ -133,20 +146,19 @@ mounts.
 Adjust bind mounts
 ------------------
 
-There are four crucial bind mounts for each instrument:
+There are six crucial bind mounts for each instrument:
 
-* directory that holds the buffer and the holding area,
-* directory where logs are kept (usually ``/var/log``),
-* directory with the configuration files (be default, ``handoff/etc``).
-* directory with SSH keys needed to access to the endpoint site (usually
+#. the buffer
+#. the holding area,
+#. directory with the configuration files,
+#. directory with the SQLite database,
+#. directory where logs are kept,
+#. directory with SSH keys needed to access to the endpoint site (usually
   ``~/.ssh``).
 
 These bind mounts are defined in **volumes** section for each buffer manager in
-``handoff/docker-compose.yaml``.  For sake of simplicity, provided example
-files assume that the host have identical directory structure as the container
-with the buffer manager so the mapping is straightforward.  In reality, it's
-hardly the case.  You need to make sure that the bind mounts accurately reflect
-actual setup!
+``docker-compose.yaml``.  You need to make sure that the bind mounts accurately
+reflect actual setup!
 
 .. note::
 
@@ -182,7 +194,7 @@ it as follow:
 
       cd handoff
       source env.bash
-      docker-compose build dbbbm
+      docker-compose build at-dbbbm
 
 .. _section-handoff-starting:
 
@@ -192,7 +204,7 @@ Start the container
 Once you created a configuration files satisfying your needs, adjusted the bind
 mounts you are ready to start the container with handoff buffer manager.
 
-If you haven't done it already, intialize runtime environment with
+If you haven't done it already, initialize runtime environment with
 
 .. code-block:: bash
 
@@ -215,188 +227,19 @@ To start the handoff manager for a selected instrument, say Comcam, run
 DBB endpoint buffer manager
 ===========================
 
-Currently package `ctrl_oods`_ implementing Observatory Operation Data Service
-(OODS) is used to emulate functionality of DBB endpoint buffer manager.
-
-.. _ctrl_oods: https://github.com/lsst-dm/ctrl_oods
-
-.. _section-endpoint-download:
-
-Download and install DBB endpoint buffer manager
-------------------------------------------------
-
-Create a directory where you want to install DBB endpoint buffer manager. For
-example:
-
-.. code-block:: bash
-
-   mkdir -p lsstsw/addons
-   cd lsstsw/addons
-
-Download ``ctrl_oods`` by cloning its repository from GitHub:
-
-.. code-block:: bash
-
-   git clone https://github.com/lsst-dm/ctrl_oods .
-   cd ctrl_oods
-
-Make sure you selected the required version of ``ctrl_oods``:
-
-.. code-block:: bash
-
-   git checkout 1.0.0-rc1
-
-.. warning::
-
-   Newer implementations of OODS use messaging system which is not supported by
-   DBB buffer manager and won't work with it!
-
-Set it up and build with
-
-.. code-block:: bash
-
-   setup -r .
-   scons
-
-.. _section-endpoint-testing:
-
-Test DBB endpoint buffer manager
---------------------------------
-
-After you’ve installed DBB endpoint buffer manager, you can run ``oods.py
---help`` to check if the installation was successful and see its usage.
-
-.. _section-endpoint-configuration:
-
-Configure DBB endpoint buffer manager
--------------------------------------
-
-DBB endpoint buffer manager comes with an example configuration file,
-``etc/oods.yaml``.  However, you can't use it without making few adjustments.
-
-Firstly, you need to provide the location of the buffer and Gen2 repo in the
-*ingester* section (here ``/data/buffer`` and ``/data/gen2repo`` respectively).
+The DBB endpoint manager is available on GitHub. Clone the repository with
 
 .. code-block::
 
-   ingester:
-     directories:
-       - /data/buffer
-     butler:
-       class:
-         import : lsst.ctrl.oods.gen2ButlerIngester
-         name : Gen2ButlerIngester
-         repoDirectory: /data/gen2repo
-       batchSize: 20
-       scanInterval:
-         <<: *interval
-         seconds: 10
+   git clone https://github.com/lsst-dm/dbb_buffmngrs_endpoint
+   cd dbb_buffmngrs_endpoint
+
+and follow the instructions in
+``doc/lsst.dbb.buffmngrs.endpoint/get-started.rst``.
 
 .. note::
 
-   ``scanInterval`` indicates how often the manager will scan the buffer for
-   new files.  While it's not required, you may set it to value you consider
-   reasonable in your case.  You should left other options unchanged, unless
-   you know what you're doing.
+   You can build and preview this document in your browser by following the
+   instructions from the `LSST Developer Guide`_.
 
-Finally, you need to disable file cleaner. You can achieve this by creating an
-empty directory
-
-.. code-block::
-
-   mkdir /tmp/empty
-
-and updating *cacheCleaner* section accordingly
-
-.. code-block::
-
-   cacheCleaner:
-     directories:
-       - /tmp/empty
-     scanInterval:
-       <<: *interval
-       seconds: 30
-     filesOlderThan:
-       <<: *interval
-       days: 30 
-     directoriesEmptyForMoreThan:
-       <<: *interval
-       days: 1
-
-.. note::
-
-   For initial version of the manager, the intent is to use OODS "as is".
-   However, OODSs' goal is slightly different comparing to DBB ingest service.
-   As a result, it removes periodically files it considers obsolete from the
-   Gen2 repo.  This "workaround" will not be necessary in the future.
-
-.. _section-dbbis-setup:
-
-Set up DBB endpoint buffer manager
-----------------------------------
-
-Before you can start DBB endpoint buffer manager, you need to set up LSST stack
-and ``ctrl_oods``.  
-
-Let the locations where the stack and ``ctrl_oods`` are installed be defined by
-environmental variables ``LSSTSW`` and ``ADDONSW`` respectively, e.g.,
-
-.. code-block::
-
-   export LSSTSW="/software/lsstsw/stack"
-   export ADDONSW="/software/lsstsw/addons"
-
-Then you can set LSST stack up with
-
-.. code-block::
-
-   source ${LSSTSW}/loadLSST.bash
-   setup lsst_distrib
-   # or setup lsst_distrib -t <tag, e.g., w_2020_09>
-
-If needed, setup other special versions of packages, e.g., 
-
-.. code-block::
-
-   setup -j obs_lsst -t <tag>
-   # or cd /to/my/build/of/package; setup -j -r .
-
-Finally, set up ``ctrl_oods`` itself
-
-.. code-block::
-
-   setup -j -r ${ADDONSW}/ctrl_oods
-
-.. note::
-
-   For conveniece, you may want to set ``LSSTSW`` and ``ADDONSW`` variables in
-   your ``.bashrc`` and then run ``source ~/.bashrc`` or open a new terminal
-   for changes to take effect.
-
-.. _section-endpoint-running:
-
-Start DBB endpoint buffer manager
----------------------------------
-
-The repository you cloned contains a helping script, ``bin/start_oods.sh``
-which simplifies starting DBB endpoint buffer manager.  Copy it to a location
-searched by shell for executables (e.g. ``$HOME/bin`` on Centos)
-
-.. code-block::
-
-   cp bin/start_oods.sh $HOME/bin
-
-Then you can start DBB ingest service with
-
-.. code-block::
-
-   start_oods.sh oods.yaml
-   
-where ``oods.yaml`` is the configuration file you prepared in :ref:`previous
-step <section-dbbis-configuration>`.
-
-.. note::
-
-   By default, the all messages are logged to ``/var/log/oods.log``. You can
-   changed the defult location using ``-l`` option. Run ``start_oods.sh -h``
-   for help.
+.. __: https://developer.lsst.io/stack/building-single-package-docs.html

@@ -1,3 +1,5 @@
+database:                                                                       
+  engine: sqlite:////var/lib/sqlite/data/comcam.db
 handoff:
   buffer: /data/buffer
   holding: /data/holding
@@ -6,6 +8,8 @@ endpoint:
   host: endpoint.host.edu
   buffer: /data/cc/buffer
   staging: /data/cc/staging
-  storage: /data/cc/storage
+  commands:
+    remote: "ssh -l {user} {host} \"{command}\""
+    transfer: "bbcp -T \"ssh -a -x -oFallBackToRsh=no %4 %I -l %U %H /home/lsstdbot/bin/bbcp\" -Z 56000:57000 -s 4 {batch} {user}@{host}:{dest}"
 logging:
   file: /var/log/cc_handoff.log

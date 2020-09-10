@@ -19,11 +19,14 @@ services:
         source: /data
         target: /data
       - type: bind
-        source: /var/log
-        target: /var/log
-      - type: bind
-        source: ./etc
+        source: ${HOME}/local/etc
         target: /home/mgr/local/etc
+      - type: bind
+        source: ${HOME}/local/var/lib/sqlite/data
+        target: /var/lib/sqlite/data
+      - type: bind
+        source: ${HOME}/local/var/log
+        target: /var/log/dbbbm
       - type: bind
         source: ${HOME}/.ssh
         target: /tmp/.ssh
@@ -47,11 +50,14 @@ services:
         source: /data
         target: /data
       - type: bind
-        source: /var/log
-        target: /var/log
-      - type: bind
-        source: ./etc
+        source: ${HOME}/local/etc
         target: /home/mgr/local/etc
+      - type: bind
+        source: ${HOME}/local/var/lib/sqlite/data
+        target: /var/lib/sqlite/data
+      - type: bind
+        source: ${HOME}/local/var/log/
+        target: /var/log/dbbbm
       - type: bind
         source: ${HOME}/.ssh
         target: /tmp/.ssh
